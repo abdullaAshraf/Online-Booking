@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Ml3b</string>
+    <string name="facebook_app_id">275090616460043</string>
+    <string name="fb_login_protocol_scheme">fb275090616460043</string>
+    <string name="action_settings">Settings</string>
+    <string name="delete">DELETE</string>
+</resources>
