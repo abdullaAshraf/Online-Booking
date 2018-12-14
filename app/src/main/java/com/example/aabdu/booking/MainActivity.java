@@ -1,21 +1,16 @@
 package com.example.aabdu.booking;
 
-import android.content.Intent;
-import android.net.Uri;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +18,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static List<Block> blockList = new ArrayList<>();
+    public static String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         //LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile"));
         //isLoggedIn = false;
         if(isLoggedIn) {
+            SharedPreferences sharedPref = this.getSharedPreferences("pref",Context.MODE_PRIVATE);
+            userEmail = sharedPref.getString("userEmail" , "");
 
             Fragment fragment = new HomeFragment();
 
@@ -57,12 +55,6 @@ public class MainActivity extends AppCompatActivity {
             transaction.replace(R.id.content_fragment, fragment);
             transaction.commit();
         }
-        //Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://murmuring-citadel-12769.herokuapp.com/auth/facebook"));
-        //startActivity(browserIntent);
-
-        //DataHandler dh = new DataHandler(this);
-        //dh.addUser("1","a","abdulla", "ashraf");
-        //dh.getData();
     }
 
     private void fillBlockData() {

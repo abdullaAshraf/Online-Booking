@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -24,6 +25,7 @@ public class DataHandler {
     ArrayList<Booking> list = new ArrayList<>();
 
     HashMap<String,String> data;
+    String addToUrl = "";
 
     Context context;
 
@@ -33,20 +35,25 @@ public class DataHandler {
 
     public void getReservations(){
         data = new HashMap<>();
+        addToUrl = "getreservations";
         new GetReservations().execute();
     }
 
     public void getReservations(Date date){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         data = new HashMap<>();
-        data.put("day",Integer.toString(date.getDate()));
-        data.put("month",Integer.toString(date.getMonth()));
-        data.put("year",Integer.toString(date.getYear()));
+        data.put("day",Integer.toString(cal.get(Calendar.DAY_OF_MONTH)));
+        data.put("month",Integer.toString(cal.get(Calendar.MONTH)));
+        data.put("year",Integer.toString(cal.get(Calendar.YEAR)));
+        addToUrl = "getreservationbyday";
         new GetReservations().execute();
     }
 
     public void getReservations(String email){
         data = new HashMap<>();
         data.put("email",email);
+        addToUrl = "getreservationbyperson";
         new GetReservations().execute();
     }
 
@@ -67,13 +74,15 @@ public class DataHandler {
     }
 
     public boolean deleteReservation(Date date){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         HttpHandler httpHandler = new HttpHandler();
         data = new HashMap<>();
-        data.put("day",Integer.toString(date.getDate()));
-        data.put("month",Integer.toString(date.getMonth()));
-        data.put("year",Integer.toString(date.getYear()));
-        data.put("starth",Integer.toString(date.getHours()));
-        data.put("startm",Integer.toString(date.getMinutes()));
+        data.put("day",Integer.toString(cal.get(Calendar.DAY_OF_MONTH)));
+        data.put("month",Integer.toString(cal.get(Calendar.MONTH)));
+        data.put("year",Integer.toString(cal.get(Calendar.YEAR)));
+        data.put("starth",Integer.toString(cal.get(Calendar.HOUR)));
+        data.put("startm",Integer.toString(cal.get(Calendar.MINUTE)));
         String dataString = "";
         for (String item: data.values())
             dataString += "/" + item;
@@ -82,14 +91,16 @@ public class DataHandler {
     }
 
     public boolean addReservation(String email , Date date , int duration){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         HttpHandler httpHandler = new HttpHandler();
         data = new HashMap<>();
         data.put("email",email);
-        data.put("day",Integer.toString(date.getDate()));
-        data.put("month",Integer.toString(date.getMonth()));
-        data.put("year",Integer.toString(date.getYear()));
-        data.put("starth",Integer.toString(date.getHours()));
-        data.put("startm",Integer.toString(date.getMinutes()));
+        data.put("day",Integer.toString(cal.get(Calendar.DAY_OF_MONTH)));
+        data.put("month",Integer.toString(cal.get(Calendar.MONTH)));
+        data.put("year",Integer.toString(cal.get(Calendar.YEAR)));
+        data.put("starth",Integer.toString(cal.get(Calendar.HOUR)));
+        data.put("startm",Integer.toString(cal.get(Calendar.MINUTE)));
         data.put("durationinm",Integer.toString(duration));
         httpHandler.sendPost(url + "addreservation" , data);
         return true;
@@ -116,16 +127,14 @@ public class DataHandler {
             String dataString = "";
             for (String item: data.values())
                 dataString += "/" + item;
-            String jsonStr = sh.makeServiceCall(url + "getreservations" + dataString);
+            String jsonStr = sh.makeServiceCall(url + addToUrl + dataString);
 
             Log.e(TAG, "Response from url: " + jsonStr);
 
             if (jsonStr != null) {
                 try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-
                     // Getting JSON Array node
-                    JSONArray reservations = jsonObj.getJSONArray("reservations");
+                    JSONArray reservations = new JSONArray(jsonStr);
 
                     // looping through All Reservations
                     for (int i = 0; i < reservations.length(); i++) {
@@ -154,9 +163,14 @@ public class DataHandler {
             // Dismiss the progress dialog
             if (pDialog.isShowing())
                 pDialog.dismiss();
+            //show data
+            CheckFragment.bookingsList = list;
+            CheckFragment.mAdapter.setItems(list);
+            CheckFragment.mAdapter.notifyDataSetChanged();
             for (Booking b: list) {
                 Log.e(TAG,b.getDate() + b.getTime(true));
             }
+
         }
 
     }

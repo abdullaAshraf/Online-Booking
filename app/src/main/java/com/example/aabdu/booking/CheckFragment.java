@@ -45,9 +45,9 @@ public class CheckFragment extends Fragment implements RecyclerItemTouchHelper.R
 
     private FragmentActivity myContext;
     private RecyclerView recyclerView;
-    private BookingAdapter mAdapter;
+    static BookingAdapter mAdapter;
     private CoordinatorLayout coordinatorLayout;
-    List<Booking> bookingsList = new ArrayList<>();
+    static List<Booking> bookingsList = new ArrayList<>();
 
     // url to fetch menu json
     private static final String URL = "https://api.androidhive.info/json/menu.json";
@@ -76,7 +76,7 @@ public class CheckFragment extends Fragment implements RecyclerItemTouchHelper.R
         coordinatorLayout = view.findViewById(R.id.coordinator_layout);
 
         fillUserBookingList();
-        mAdapter = new BookingAdapter(bookingsList);
+        mAdapter = new BookingAdapter(bookingsList, myContext);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -110,44 +110,15 @@ public class CheckFragment extends Fragment implements RecyclerItemTouchHelper.R
 
 
     void fillUserBookingList(){
+        DataHandler dh = new DataHandler(myContext);
+        dh.getReservations(MainActivity.userEmail);
+
+        /*
+        //demo data
         bookingsList.add(new Booking("12/05/2017",3,15,5,45));
         bookingsList.add(new Booking("25/01/2018",7,45,5,30));
         bookingsList.add(new Booking("05/11/2019",12,30,18,0));
-    }
-
-    /**
-     * method make volley network call and parses json
-     */
-    private void prepareList() {
-        JsonArrayRequest request = new JsonArrayRequest(URL,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        if (response == null) {
-                            Toast.makeText(getContext(), "Couldn't fetch the menu! Pleas try again.", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        List<Booking> items = new Gson().fromJson(response.toString(), new TypeToken<List<Booking>>() {
-                        }.getType());
-
-                        // adding items to cart list
-                        bookingsList.clear();
-                        bookingsList.addAll(items);
-
-                        // refreshing recycler view
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error in getting json
-                Log.d("considerThisATag", "Error: " + error.getMessage());
-                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        //MyApplication.getInstance().addToRequestQueue(request);
+        */
     }
 
     /**

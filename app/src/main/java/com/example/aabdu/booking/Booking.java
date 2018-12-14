@@ -2,6 +2,10 @@ package com.example.aabdu.booking;
 
 import android.text.style.TtsSpan;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Booking {
     private String id;
     private boolean confirmed;
@@ -34,6 +38,22 @@ public class Booking {
 
     public String getDate() {
         return date;
+    }
+
+    public Date getDateTime(){
+        Date datetime = null;
+        try {
+            datetime = new SimpleDateFormat("dd/MM/yyyy").parse(date);
+            datetime.setHours(sHour);
+            datetime.setMinutes(sMin);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return datetime;
+    }
+
+    public int getDur(){
+        return 60*(eHour - sHour) + eMin - sMin;
     }
 
     public String getTime(boolean start) {

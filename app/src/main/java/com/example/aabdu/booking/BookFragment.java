@@ -5,10 +5,13 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class BookFragment extends Fragment{
 
@@ -40,6 +44,10 @@ public class BookFragment extends Fragment{
 
     private TimePicker picker2;
     private NumberPicker minutePicker2;
+
+    private Date pickedDate;
+    private int startm,starth;
+    private int dur;
 
     public BookFragment() {
         // Required empty public constructor
@@ -105,11 +113,16 @@ public class BookFragment extends Fragment{
                 date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
                 dateButton.setText(sdf.format(date.getTime()));
+                pickedDate = date.getTime();
+
                 //TODO change reserved bar
             }
         };
 
         dateButton.setText(sdf.format(Calendar.getInstance().getTime()));
+        pickedDate = Calendar.getInstance().getTime();
+        starth = picker.getCurrentHour();
+        startm = getMinute();
 
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,6 +145,9 @@ public class BookFragment extends Fragment{
         });
 
         final TextView durtation = (TextView) view.findViewById(R.id.textDuration);
+        durtation.setText("0:00 Hours");
+        dur = 0;
+
 
         final TimePicker.OnTimeChangedListener pickerListener = new TimePicker.OnTimeChangedListener() {
             @Override
@@ -139,6 +155,11 @@ public class BookFragment extends Fragment{
                 Calendar date1 = Calendar.getInstance();
                 date1.set(Calendar.HOUR_OF_DAY,picker.getCurrentHour());
                 date1.set(Calendar.MINUTE,getMinute());
+                starth = picker.getCurrentHour();
+                startm = getMinute();
+
+                //pickedDate.setHours(picker.getCurrentHour());
+                //pickedDate.setMinutes(getMinute());
 
                 Calendar date2 = Calendar.getInstance();
                 date2.set(Calendar.HOUR_OF_DAY,picker2.getCurrentHour());
@@ -148,7 +169,8 @@ public class BookFragment extends Fragment{
                 int hours = (int) seconds/3600;
                 int mins = (int) (seconds/60) % 60;
 
-                //TODO handle negative
+                dur = (int) seconds/60;
+                //TODO handle negative and collision
 
                 String diff = hours + ":" + (mins < 10 ? "0"+mins : mins) + " Hours";
                 durtation.setText(diff);
@@ -171,7 +193,23 @@ public class BookFragment extends Fragment{
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO
+                //add reservation to database
+                DataHandler dh = new DataHandler(myContext);
+                Calendar calendar=Calendar.getInstance();
+                calendar.setTime(pickedDate);
+                calendar.set(Calendar.HOUR_OF_DAY, starth);
+                calendar.set(Calendar.MINUTE, startm);
+                pickedDate=calendar.getTime();
+                dh.addReservation(MainActivity.userEmail , pickedDate , dur);
+
+                //go to check reservations
+                Fragment fragment = new CheckFragment();
+
+                FragmentManager fm = myContext.getSupportFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                transaction.replace(R.id.content_fragment, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 

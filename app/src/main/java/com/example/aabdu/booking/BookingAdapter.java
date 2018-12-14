@@ -1,4 +1,5 @@
 package com.example.aabdu.booking;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import java.util.List;
 
 public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHolder>{
     private List<Booking> bookingsList;
+    private DataHandler dh;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView stime;
@@ -19,15 +21,20 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
         public MyViewHolder(View view) {
             super(view);
-            stime = (TextView) view.findViewById(R.id.start_time);
-            etime = (TextView) view.findViewById(R.id.end_time);
-            date = (TextView) view.findViewById(R.id.date);
+            stime = view.findViewById(R.id.start_time);
+            etime = view.findViewById(R.id.end_time);
+            date = view.findViewById(R.id.date);
             viewForeground = view.findViewById(R.id.foreground);
         }
     }
 
 
-    public BookingAdapter(List<Booking> bookingsList) {
+    public BookingAdapter(List<Booking> bookingsList , Context mcontext) {
+        dh = new DataHandler(mcontext);
+        this.bookingsList = bookingsList;
+    }
+
+    public void setItems(List<Booking> bookingsList) {
         this.bookingsList = bookingsList;
     }
 
@@ -56,13 +63,14 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         bookingsList.remove(position);
         // notify the item removed by position
         // to perform recycler view delete animations
-        // NOTE: don't call notifyDataSetChanged()
         notifyItemRemoved(position);
+        dh.deleteReservation(bookingsList.get(position).getDateTime());
     }
 
     public void restoreItem(Booking item, int position) {
         bookingsList.add(position, item);
         // notify item added by position
         notifyItemInserted(position);
+        dh.addReservation(MainActivity.userEmail,item.getDateTime(),item.getDur());
     }
 }

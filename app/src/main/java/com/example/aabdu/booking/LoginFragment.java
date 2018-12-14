@@ -1,7 +1,9 @@
 package com.example.aabdu.booking;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -109,42 +111,45 @@ public class LoginFragment extends Fragment{
     private void setFacebookData(final LoginResult loginResult)
     {
         GraphRequest request = GraphRequest.newMeRequest(
-                loginResult.getAccessToken(),
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(JSONObject object, GraphResponse response) {
-                        // Application code
-                        try {
-                            Log.i("Response",response.toString());
+            loginResult.getAccessToken(),
+            new GraphRequest.GraphJSONObjectCallback() {
+                @Override
+                public void onCompleted(JSONObject object, GraphResponse response) {
+                    // Application code
+                    try {
+                        Log.i("Response",response.toString());
 
-                            String email = response.getJSONObject().getString("email");
-                            String firstName = response.getJSONObject().getString("first_name");
-                            String lastName = response.getJSONObject().getString("last_name");
+                        String email = response.getJSONObject().getString("email");
+                        String firstName = response.getJSONObject().getString("first_name");
+                        String lastName = response.getJSONObject().getString("last_name");
 
+                        SharedPreferences sharedPref = myContext.getSharedPreferences("pref", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("userEmail", email);
+                        editor.commit();
 
-
-                            Profile profile = Profile.getCurrentProfile();
-                            //String id = profile.getId();
-                            //String link = profile.getLinkUri().toString();
-                            //Log.i("Link",link);
-                            if (Profile.getCurrentProfile()!=null)
-                            {
-                                Log.i("Login", "ProfilePic" + Profile.getCurrentProfile().getProfilePictureUri(200, 200));
-                            }
-
-                            Log.i("Login" + "Email", email);
-                            Log.i("Login"+ "FirstName", firstName);
-                            Log.i("Login" + "LastName", lastName);
-
-                            DataHandler dh = new DataHandler(myContext);
-
-                            dh.addUser(loginResult.getAccessToken().getUserId(), email , firstName , lastName);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        Profile profile = Profile.getCurrentProfile();
+                        //String id = profile.getId();
+                        //String link = profile.getLinkUri().toString();
+                        //Log.i("Link",link);
+                        if (Profile.getCurrentProfile()!=null)
+                        {
+                            Log.i("Login", "ProfilePic" + Profile.getCurrentProfile().getProfilePictureUri(200, 200));
                         }
+
+                        Log.i("Login" + "Email", email);
+                        Log.i("Login"+ "FirstName", firstName);
+                        Log.i("Login" + "LastName", lastName);
+
+                        DataHandler dh = new DataHandler(myContext);
+
+                        dh.addUser(loginResult.getAccessToken().getUserId(), email , firstName , lastName);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                });
+                }
+            });
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,email,first_name,last_name");
         request.setParameters(parameters);
